@@ -3,5 +3,9 @@
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit",
     "source.sortMembers": "explicit"
+  },
+  "sonarlint.connectedMode.project": {
+    "connectionId": "tsuchiyayuki299-sonar",
+    "projectKey": "TsuchiyaYuki299_matchan-native"
   }
 }
