@@ -1,4 +1,5 @@
-import { useSignIn, useSignUp } from "@clerk/clerk-expo"; // ← useSignUpを追加
+import { useSignIn, useSignUp } from "@clerk/clerk-expo";
+import * as Linking from "expo-linking"; // ← メールのリンクからアプリに戻るための機能を追加
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -13,7 +14,7 @@ import {
 
 export default function LoginScreen() {
   const { signIn, isLoaded: isSignInLoaded } = useSignIn();
-  const { signUp, isLoaded: isSignUpLoaded } = useSignUp(); // ← サインアップ用の機能を準備
+  const { signUp, isLoaded: isSignUpLoaded } = useSignUp();
   const router = useRouter();
   const [emailAddress, setEmailAddress] = useState("");
 
@@ -21,43 +22,62 @@ export default function LoginScreen() {
   const onSignInPress = async () => {
     if (!isSignInLoaded || !isSignUpLoaded) return;
 
+    // メールのリンクを踏んだ時に、このアプリに戻ってくるためのURLを自動生成
+    const redirectUrl = Linking.createURL("/");
+
     try {
-      // 【1】まずは既存アカウントとしてのログインを試みる
-      await signIn.create({
+      // 【1】既存アカウントとしてのログイン準備
+      const { supportedFirstFactors } = await signIn.create({
         identifier: emailAddress,
       });
 
-      // 成功した場合（＝すでに登録済み）
-      alert("おかえりなさい！\nログイン用のメールを送信しました。");
+      // マジックリンク（email_link）の送信設定を探す
+      const emailLinkFactor: any = supportedFirstFactors?.find(
+        (factor: any) => factor.strategy === "email_link",
+      );
+
+      if (emailLinkFactor) {
+        // 実際にログイン用メールを送信する処理！
+        await signIn.prepareFirstFactor({
+          strategy: "email_link",
+          emailAddressId: emailLinkFactor.emailAddressId,
+          redirectUrl,
+        });
+        alert("おかえりなさい！\nログイン用のメールを送信しました。");
+      }
     } catch (err: any) {
-      // エラーメッセージとエラーコードを取得
       const errorMsg = err.errors[0]?.message || "";
       const errorCode = err.errors[0]?.code || "";
 
-      // 【2】エラー内容が「アカウントが見つからない」だった場合、自動で新規登録へ！
+      // 【2】アカウントが見つからない場合は自動で新規登録へ
       if (
         errorCode === "form_identifier_not_found" ||
         errorMsg.includes("Couldn't find your account")
       ) {
         try {
-          // 新規アカウントの作成を開始
+          // 新規アカウントの登録準備
           await signUp.create({
             emailAddress: emailAddress,
           });
 
-          // 作成に成功した場合（＝はじめてのユーザー）
+          // 実際に新規登録用メール（マジックリンク）を送信する処理！
+          await signUp.prepareEmailAddressVerification({
+            strategy: "email_link",
+            redirectUrl,
+          });
+
           alert("はじめまして！\n新規登録用のメールを送信しました。");
         } catch (signUpErr: any) {
           console.error(JSON.stringify(signUpErr, null, 2));
           alert("新規登録エラー: " + signUpErr.errors[0]?.message);
         }
       } else {
-        // アカウントが見つからない「以外」の予期せぬエラー
         console.error(JSON.stringify(err, null, 2));
         alert("エラーが発生しました: " + errorMsg);
       }
     }
   };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
