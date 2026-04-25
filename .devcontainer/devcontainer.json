@@ -1,0 +1,53 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
+{
+  "name": "Matchan-Dev-Env",
+  // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:4-24-trixie",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {}
+  },
+
+  // Features to add to the dev container. More info: https://containers.dev/features.
+  // "features": {},
+
+  "appPort": [8081, 19000, 19001, 19002],
+
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  "forwardPorts": [8081, 19000, 19001, 19002],
+
+  // Use 'postCreateCommand' to run commands after the container is created.
+  "postCreateCommand": "npm install -g expo-cli",
+
+  // Configure tool-specific properties.
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ics.japanese-proofreading", // 【テキスト校正くん】日本語の入力ミスや不自然な表現をチェック
+        "esbenp.prettier-vscode", // 【Prettier】コードのレイアウトを自動できれいに整える
+        "formulahendry.auto-rename-tag", // HTMLタグの開始を書き換えると、終了タグも自動で書き換える
+        "usernamehw.errorlens", // エラー内容を行内に直接表示して、見逃しを防ぐ
+        "ritwickdey.LiveServer", // ローカルサーバーを起動して、HTMLの変更をリアルタイムでブラウザに反映
+        "christian-kohler.path-intellisense", // ファイルのパス（場所）を入力するときに補完してくれる
+        "mhutchie.git-graph", // Gitの履歴（コミットの流れ）をグラフで視覚的に表示
+        "vincaslt.highlight-matching-tag", // 対になるHTMLタグを強調表示して、構造をわかりやすくする
+        "oderwat.indent-rainbow", // インデント（字下げ）に色をつけて、コードの階層を読みやすくする
+        "formulahendry.code-runner", // 記述中のコードをボタン一つですぐに実行して結果を確認
+        "streetsidesoftware.code-spell-checker", // 英単語のスペルミスをチェック（変数名のタイポ防止）
+        "pranayprakash.vscode-css-peek", // HTMLから対応するCSSの定義を直接覗き見・ジャンプできる
+        "mikestead.dotenv", // .envファイル（環境変数）に色をつけて読みやすくする
+        "google.gemini-code-assist", // 【Gemini】AIがコード作成をサポートしてくれる
+        "ecmel.vscode-html-css", // HTML内でCSSのクラス名の補完を効かせる
+        "anikethsaha.htmllinter", // HTMLの書き方に間違いがないかルールに従ってチェック
+        "kisstamas.vscode-image-preview", // コード上の画像パスにマウスを乗せると、画像のプレビューを表示
+        "bradlc.vscode-tailwindcss", // 【Tailwind CSS】クラス名の自動補完や構文チェックを行う
+        "ms-ceintl.vscode-language-pack-ja", // VS Code自体のメニューなどを日本語化する
+        "shd101wyy.markdown-preview-enhanced", //Mermaid記法などの拡張
+        "SonarSource.sonarlint-vscode" //sonarQubeをvscode上で動かせる
+      ]
+    }
+  }
+
+  // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+  // "remoteUser": "root"
+}
