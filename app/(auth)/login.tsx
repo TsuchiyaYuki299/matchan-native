@@ -1,4 +1,4 @@
-import { useSignIn } from "@clerk/clerk-expo";
+import { useSignIn, useSignUp } from "@clerk/clerk-expo"; // ← useSignUpを追加
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -12,30 +12,52 @@ import {
 } from "react-native";
 
 export default function LoginScreen() {
-  const { signIn, setActive, isLoaded } = useSignIn();
+  const { signIn, isLoaded: isSignInLoaded } = useSignIn();
+  const { signUp, isLoaded: isSignUpLoaded } = useSignUp(); // ← サインアップ用の機能を準備
   const router = useRouter();
   const [emailAddress, setEmailAddress] = useState("");
 
-  // マジックリンク送信処理
+  // メール送信処理（ログイン・新規登録の自動判定）
   const onSignInPress = async () => {
-    if (!isLoaded) return;
+    if (!isSignInLoaded || !isSignUpLoaded) return;
 
     try {
-      // Clerkでサインイン開始（マジックリンクを飛ばす）
-      const { supportedFirstFactors } = await signIn.create({
+      // 【1】まずは既存アカウントとしてのログインを試みる
+      await signIn.create({
         identifier: emailAddress,
       });
 
-      // メール認証への案内
-      alert(
-        "メールを送信しました。届いたリンクをクリックしてログインしてください。",
-      );
+      // 成功した場合（＝すでに登録済み）
+      alert("おかえりなさい！\nログイン用のメールを送信しました。");
     } catch (err: any) {
-      console.error(JSON.stringify(err, null, 2));
-      alert("エラーが発生しました: " + err.errors[0].message);
+      // エラーメッセージとエラーコードを取得
+      const errorMsg = err.errors[0]?.message || "";
+      const errorCode = err.errors[0]?.code || "";
+
+      // 【2】エラー内容が「アカウントが見つからない」だった場合、自動で新規登録へ！
+      if (
+        errorCode === "form_identifier_not_found" ||
+        errorMsg.includes("Couldn't find your account")
+      ) {
+        try {
+          // 新規アカウントの作成を開始
+          await signUp.create({
+            emailAddress: emailAddress,
+          });
+
+          // 作成に成功した場合（＝はじめてのユーザー）
+          alert("はじめまして！\n新規登録用のメールを送信しました。");
+        } catch (signUpErr: any) {
+          console.error(JSON.stringify(signUpErr, null, 2));
+          alert("新規登録エラー: " + signUpErr.errors[0]?.message);
+        }
+      } else {
+        // アカウントが見つからない「以外」の予期せぬエラー
+        console.error(JSON.stringify(err, null, 2));
+        alert("エラーが発生しました: " + errorMsg);
+      }
     }
   };
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -81,18 +103,18 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FDFBF7", // 暖かい背景色 (warm-50相当)
-    justifyContent: "center", // 縦方向の真ん中に配置
-    paddingHorizontal: 32, // 左右の余白
+    backgroundColor: "#FDFBF7",
+    justifyContent: "center",
+    paddingHorizontal: 32,
   },
   header: {
-    alignItems: "center", // 横方向の真ん中に配置
+    alignItems: "center",
     marginBottom: 40,
   },
   title: {
     fontSize: 36,
     fontWeight: "bold",
-    color: "#D97757", // メインカラー (warm-500相当)
+    color: "#D97757",
     marginBottom: 8,
   },
   subtitle: {
@@ -107,12 +129,11 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     borderWidth: 1,
     borderColor: "#F5EFE6",
-    // 影をつける設定
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 2, // Android用の影
+    elevation: 2,
   },
   label: {
     fontSize: 14,
