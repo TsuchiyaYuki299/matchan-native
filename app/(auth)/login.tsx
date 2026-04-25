@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -38,46 +39,115 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-warm-50 justify-center px-8"
+      style={styles.container}
     >
-      <View className="items-center mb-10">
-        <Text className="text-4xl font-bold text-warm-500 mb-2">Matchan</Text>
-        <Text className="text-gray-600 text-center">
+      <View style={styles.header}>
+        <Text style={styles.title}>Matchan</Text>
+        <Text style={styles.subtitle}>
           おかえりなさい！{"\n"}メールアドレスだけで、すぐにつながれます。
         </Text>
       </View>
 
-      <View className="bg-white p-6 rounded-3xl shadow-sm border border-warm-100">
-        <Text className="text-sm font-semibold text-gray-500 mb-2">
-          メールアドレス
-        </Text>
+      <View style={styles.card}>
+        <Text style={styles.label}>メールアドレス</Text>
         <TextInput
           autoCapitalize="none"
           value={emailAddress}
           placeholder="example@mail.com"
+          placeholderTextColor="#aaa"
           onChangeText={(email) => setEmailAddress(email)}
-          className="bg-gray-50 p-4 rounded-2xl mb-6 border border-gray-100"
+          style={styles.input}
         />
 
-        <TouchableOpacity
-          onPress={onSignInPress}
-          className="bg-warm-500 p-4 rounded-2xl items-center"
-        >
-          <Text className="text-white font-bold text-lg">
-            ログイン用メールを送る
-          </Text>
+        <TouchableOpacity style={styles.button} onPress={onSignInPress}>
+          <Text style={styles.buttonText}>ログイン用メールを送る</Text>
         </TouchableOpacity>
       </View>
 
-      <View className="mt-8 items-center">
+      <View style={styles.footer}>
         <TouchableOpacity
           onPress={() => {
             /* Googleログインを後で入れる */
           }}
         >
-          <Text className="text-warm-500 font-medium">Googleで続ける</Text>
+          <Text style={styles.footerText}>Googleで続ける</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
 }
+
+// 画面を綺麗に整えるスタイルの設定
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#FDFBF7", // 暖かい背景色 (warm-50相当)
+    justifyContent: "center", // 縦方向の真ん中に配置
+    paddingHorizontal: 32, // 左右の余白
+  },
+  header: {
+    alignItems: "center", // 横方向の真ん中に配置
+    marginBottom: 40,
+  },
+  title: {
+    fontSize: 36,
+    fontWeight: "bold",
+    color: "#D97757", // メインカラー (warm-500相当)
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#666666",
+    textAlign: "center",
+    lineHeight: 22,
+  },
+  card: {
+    backgroundColor: "#FFFFFF",
+    padding: 24,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "#F5EFE6",
+    // 影をつける設定
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2, // Android用の影
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#888888",
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: "#F8F9FA",
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: "#EEEEEE",
+    fontSize: 16,
+    color: "#333",
+  },
+  button: {
+    backgroundColor: "#D97757",
+    padding: 16,
+    borderRadius: 16,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  footer: {
+    marginTop: 32,
+    alignItems: "center",
+  },
+  footerText: {
+    color: "#D97757",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+});
